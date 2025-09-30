@@ -1,0 +1,25 @@
+<Application x:Class="ShipyardDashboard.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:ShipyardDashboard.Converters"
+             xmlns:services="clr-namespace:ShipyardDashboard.Services"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <converters:AngleToPointConverter x:Key="AngleToPointConverter" />
+            <converters:AlertStatusToBrushConverter x:Key="AlertStatusToBrushConverter" />
+            <converters:AlertStatusToIconConverter x:Key="AlertStatusToIconConverter" />
+
+            <!-- Service Converters -->
+            <services:ValueGreaterThanConverter x:Key="ValueGreaterThanConverter" />
+            <services:MetricFinderConverter x:Key="MetricFinderConverter" />
+            <services:SubListConverter x:Key="SubListConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

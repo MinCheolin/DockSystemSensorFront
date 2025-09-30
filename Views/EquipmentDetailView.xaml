@@ -1,0 +1,81 @@
+<Window x:Class="ShipyardDashboard.Views.EquipmentDetailView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ShipyardDashboard.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:EquipmentDetailViewModel}"
+        Title="장비 상세 정보" Height="600" Width="800"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource LightThemeBackgroundBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{Binding EquipmentGroup.GroupName}" Style="{StaticResource TitleTextBlockStyle}" Margin="15"/>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Margin="15">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding IndividualEquipments}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource LightThemeBorderBrush}" BorderThickness="0,0,0,1" Padding="10,8" CornerRadius="4" Margin="0,2">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Status}" Value="오류">
+                                                <Setter Property="Background" Value="#FFEBEE"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="점검 필요">
+                                                <Setter Property="Background" Value="#FFEBEE"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="대기">
+                                                <Setter Property="Background" Value="#FFFDE7"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="정지">
+                                                <Setter Property="Background" Value="#FFFDE7"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource LightThemePrimaryTextBrush}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                        <TextBlock Text="상태: " Foreground="{StaticResource LightThemeSecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Status}" FontWeight="SemiBold" Foreground="{StaticResource LightThemeAccentBrush}"/>
+                                    </StackPanel>
+                                    <ItemsControl ItemsSource="{Binding Details}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Margin="10,2,0,0">
+                                                    <TextBlock Foreground="{StaticResource LightThemeSecondaryTextBrush}">
+                                                        <Run Text="{Binding Key, Mode=OneWay}"/>
+                                                        <Run Text=": "/>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Value.Display}" Foreground="{StaticResource LightThemePrimaryTextBrush}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <Button Grid.Row="2" Content="닫기" Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" 
+                Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" Margin="15" Width="100"/>
+    </Grid>
+</Window>
