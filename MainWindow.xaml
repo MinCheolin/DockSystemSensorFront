@@ -4,14 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:ShipyardDashboard.ViewModels"
-        xmlns:views="clr-namespace:ShipyardDashboard.Views"
         xmlns:local="clr-namespace:ShipyardDashboard"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         Title="Shipyard Integrated Dashboard v3.0"
-        Width="1600" Height="1000"
+        Width="1800" Height="1024"
         Background="{StaticResource LightThemeBackgroundBrush}">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <Style x:Key="ProcessTabItemStyle" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="20,12"/>
             <Setter Property="Margin" Value="5,0"/>
@@ -36,20 +36,17 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280"/> <!-- Column 0: New Notification Panel -->
-            <ColumnDefinition Width="*"/>   <!-- Column 1: Main Content -->
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Column 0: Integrated Notification & Status Panel (Dark Theme) -->
         <Border Grid.Column="0" Background="{StaticResource DarkThemeBackgroundBrush}" Padding="15">
             <DockPanel>
-                <!-- 1. Overall Safety Status Icon -->
                 <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0,10,0,20">
-                    <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z" 
-                          Width="60" Height="60" 
-                          Stretch="Uniform">
+                    <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z" Width="60" Height="60" Stretch="Uniform">
                         <Path.Style>
                             <Style TargetType="Path">
                                 <Setter Property="Fill" Value="{StaticResource DarkThemeSuccessBrush}" />
@@ -64,9 +61,7 @@
                             </Style>
                         </Path.Style>
                     </Path>
-                    <TextBlock Text="{Binding GlobalAlerts.OverallStatus, Mode=OneWay}" 
-                               FontSize="22" FontWeight="Bold" 
-                               HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <TextBlock Text="{Binding GlobalAlerts.OverallStatus, Mode=OneWay}" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,0">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="{StaticResource DarkThemeSuccessBrush}" />
@@ -82,79 +77,125 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </StackPanel>
-
-                <!-- 2. Alert Summary -->
                 <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding GlobalAlerts.AlertSummary}" HorizontalAlignment="Center" Margin="0,0,0,15">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="10,0">
-                                <TextBlock Text="{Binding Key, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Foreground="{Binding Key, Converter={StaticResource AlertStatusToBrushConverter}}"/>
-                                <TextBlock Text="{Binding Key, Mode=OneWay}" Foreground="{Binding Key, Converter={StaticResource AlertStatusToBrushConverter}}" FontSize="14" FontWeight="SemiBold" Margin="5,0,2,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding Value, Mode=OneWay}" Foreground="White" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Margin="10,0"><TextBlock Text="{Binding Key, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Foreground="{Binding Key, Converter={StaticResource AlertStatusToBrushConverter}}"/><TextBlock Text="{Binding Key, Mode=OneWay}" Foreground="{Binding Key, Converter={StaticResource AlertStatusToBrushConverter}}" FontSize="14" FontWeight="SemiBold" Margin="5,0,2,0" VerticalAlignment="Center"/><TextBlock Text="{Binding Value, Mode=OneWay}" Foreground="White" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate>
                 </ItemsControl>
-                
                 <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource DarkThemeBorderBrush}" Margin="0,0,0,15"/>
-
-                <!-- 3. Detailed Alert/Log List -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding GlobalAlerts.Alerts}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{StaticResource DarkThemeCardBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
-                                    <StackPanel>
-                                        <TextBlock FontSize="14" FontWeight="Bold" Foreground="{Binding Status, Converter={StaticResource AlertStatusToBrushConverter}, Mode=OneWay}">
-                                            <Run Text="{Binding Status, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets"/>
-                                            <Run Text="{Binding AlertType, Mode=OneWay}"/>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Location, Mode=OneWay}" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" FontSize="12" Margin="0,2,0,4"/>
-                                        <TextBlock Text="{Binding Message, Mode=OneWay}" Foreground="White" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemTemplate><DataTemplate><Border Background="{StaticResource DarkThemeCardBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8"><StackPanel><TextBlock FontSize="14" FontWeight="Bold" Foreground="{Binding Status, Converter={StaticResource AlertStatusToBrushConverter}, Mode=OneWay}"><Run Text="{Binding Status, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets"/><Run Text="{Binding AlertType, Mode=OneWay}"/></TextBlock><TextBlock Text="{Binding Location, Mode=OneWay}" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" FontSize="12" Margin="0,2,0,4"/><TextBlock Text="{Binding Message, Mode=OneWay}" Foreground="White" TextWrapping="Wrap"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
             </DockPanel>
         </Border>
-        
-
 
         <!-- Column 1: Main Content Area -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Row 0: Process Tabs -->
-                <RowDefinition Height="*"/>    <!-- Row 1: Main Content -->
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Row 0: Process Tabs -->
-            <Border Grid.Row="0" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="10,0">
-                <ListBox ItemsSource="{Binding Processes}" 
-                         SelectedItem="{Binding SelectedProcess}"
-                         ItemContainerStyle="{StaticResource ProcessTabItemStyle}"
-                         BorderThickness="0">
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>
+            <Border Grid.Row="0" BorderBrush="{StaticResource LightThemeBorderBrush}" BorderThickness="0,0,0,1" Padding="10,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ListBox Grid.Column="0" ItemsSource="{Binding Processes}" SelectedItem="{Binding SelectedProcess}" ItemContainerStyle="{StaticResource ProcessTabItemStyle}" BorderThickness="0">
+                        <ListBox.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ListBox.ItemsPanel>
+                    </ListBox>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Kiosk Countdown Timer -->
+                        <TextBlock VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource LightThemeSecondaryTextBrush}"
+                                   Visibility="{Binding IsKioskModeActive, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Run Text="(다음 화면까지"/>
+                            <Run Text="{Binding KioskCountdown, Mode=OneWay}"
+                                 FontWeight="Bold" Foreground="{StaticResource LightThemeAccentBrush}"/>
+                            <Run Text="초)"/>
+                        </TextBlock>
+                        
+                        <!-- Kiosk Mode Button -->
+                        <Button Command="{Binding ToggleKioskModeCommand}" Padding="8" Style="{StaticResource IconButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                                <TextBlock Text="모니터링" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                                <Border Width="8" Height="8" CornerRadius="4" Background="LimeGreen" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsKioskModeActive}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <DataTrigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.3" Duration="0:0:0.7" RepeatBehavior="Forever" AutoReverse="True"/></Storyboard></BeginStoryboard></DataTrigger.EnterActions>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Border>
 
-            <!-- Row 1: Main Content -->
             <ContentControl Grid.Row="1" Margin="5" Content="{Binding CurrentView}"/>
         </Grid>
+
+        <!-- NEW: Critical Alert Toast Notification -->
+        <Popup IsOpen="{Binding IsCriticalAlertPopupOpen, Mode=OneWay}"
+               Placement="Relative"
+               PlacementTarget="{Binding ElementName=MainGrid}"
+               HorizontalOffset="{Binding ElementName=MainGrid, Path=ActualWidth}"
+               VerticalOffset="{Binding ElementName=MainGrid, Path=ActualHeight}"
+               AllowsTransparency="True">
+            <Popup.Style>
+                <Style TargetType="Popup">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsOpen, RelativeSource={RelativeSource Self}}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ThicknessAnimation Storyboard.TargetProperty="Margin" From="0,0,0,0" To="0,0,20,-20" Duration="0:0:0.5">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Popup.Style>
+            <Border BorderBrush="{StaticResource StatusErrorBrush}" BorderThickness="3" CornerRadius="5" Background="{StaticResource DarkThemeBackgroundBrush}" MinWidth="400" MaxWidth="500" Margin="0">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="#000000" Opacity="0.5"/>
+                </Border.Effect>
+                <StackPanel Margin="20">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE783;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="{StaticResource StatusErrorBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="긴급! 위험 알림 발생" FontSize="20" FontWeight="Bold" Foreground="White" Margin="15,0,0,0"/>
+                    </StackPanel>
+                    <Border Height="1" Background="{StaticResource DarkThemeBorderBrush}" Margin="0,10,0,10"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="위치:" Style="{StaticResource BodyTextBlockStyle}" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentCriticalAlert.Location}" Style="{StaticResource BodyTextBlockStyle}" Foreground="White" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="내용:" Style="{StaticResource BodyTextBlockStyle}" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" Margin="0,5,10,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentCriticalAlert.Message}" Style="{StaticResource BodyTextBlockStyle}" Foreground="White" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    </Grid>
+                    <Button Content="닫기" Command="{Binding CloseCriticalAlertCommand}" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" Margin="0,15,0,0" Padding="15,5" FontSize="12"/>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

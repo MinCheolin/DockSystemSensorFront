@@ -27,11 +27,19 @@ namespace ShipyardDashboard.ViewModels
         [ObservableProperty]
         private PlotModel _statusPlotModel;
 
+        [ObservableProperty]
+        private bool _hasDangerStatus;
+
+        [ObservableProperty]
+        private bool _isHighlighted; // For alert flashing trigger
+
         public EquipmentGroupViewModel(EquipmentGroup equipmentGroup)
         {
             EquipmentGroup = equipmentGroup;
             _groupName = equipmentGroup.GroupName;
             _statusPlotModel = new PlotModel();
+            _statusSummary = new Dictionary<string, int>();
+            _keyDataSummary = new Dictionary<string, string>();
             UpdateGroup(equipmentGroup); // Use UpdateGroup to initialize all properties
         }
 
@@ -42,7 +50,11 @@ namespace ShipyardDashboard.ViewModels
             TotalCount = newGroup.TotalCount;
             StatusSummary = newGroup.StatusSummary;
             KeyDataSummary = newGroup.KeyDataSummary;
-            
+
+            // Check for danger status
+            HasDangerStatus = StatusSummary.ContainsKey("위험") && StatusSummary["위험"] > 0 ||
+                              StatusSummary.ContainsKey("오류") && StatusSummary["오류"] > 0;
+
             UpdateStatusPlotModel();
         }
 
@@ -51,14 +63,15 @@ namespace ShipyardDashboard.ViewModels
             var plotModel = new PlotModel { PlotAreaBorderThickness = new OxyThickness(0), Background = OxyColors.Transparent };
             var series = new PieSeries
             {
-                StrokeThickness = 1,
+                StrokeThickness = 2,
                 Stroke = OxyColors.White,
                 InnerDiameter = 0.6,
                 StartAngle = -90,
                 AngleSpan = 360,
-                FontSize = 12,
-                OutsideLabelFormat = "{1}", // Show status name
-                InsideLabelFormat = null
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                TextColor = OxyColors.Black,
+                OutsideLabelFormat = "{1}", // {1} is the Label property of the PieSlice
             };
 
             if (StatusSummary != null)

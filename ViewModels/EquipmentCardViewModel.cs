@@ -4,6 +4,7 @@ using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using ShipyardDashboard.Models;
+using ShipyardDashboard.Services; // Added to reference EquipmentLayoutProvider
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;

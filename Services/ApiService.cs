@@ -45,7 +45,7 @@ namespace ShipyardDashboard.Services
             catch (HttpRequestException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error fetching global alerts: {ex.Message}");
-                return new GlobalAlerts { OverallStatus = "Error", Alerts = new() { new() { Type = "BACKEND NOT RESPONDING", Status = "Error", Value = ex.Message } } };
+                return new GlobalAlerts { OverallStatus = "Error", Alerts = new() { new() { AlertType = "BACKEND NOT RESPONDING", Status = "Error", Message = ex.Message } } };
             }
         }
 

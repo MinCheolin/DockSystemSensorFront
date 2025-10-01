@@ -4,11 +4,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:ShipyardDashboard.ViewModels"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:EquipmentDetailViewModel}"
-        Title="장비 상세 정보" Height="600" Width="800"
+        Title="장비 상세 정보" Height="700" Width="800"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource LightThemeBackgroundBrush}">
+    <Window.Resources>
+        <Style x:Key="HealthStatusIndicatorStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Text" Value="🟢 정상"/>
+            <Setter Property="Foreground" Value="{StaticResource LightThemeSuccessBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="주의">
+                    <Setter Property="Text" Value="🟡 주의"/>
+                    <Setter Property="Foreground" Value="{StaticResource StatusWarningBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="위험">
+                    <Setter Property="Text" Value="🔴 위험"/>
+                    <Setter Property="Foreground" Value="{StaticResource StatusErrorBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -28,46 +47,69 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderBrush="{StaticResource LightThemeBorderBrush}" BorderThickness="0,0,0,1" Padding="10,8" CornerRadius="4" Margin="0,2">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Status}" Value="오류">
-                                                <Setter Property="Background" Value="#FFEBEE"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}" Value="점검 필요">
-                                                <Setter Property="Background" Value="#FFEBEE"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}" Value="대기">
-                                                <Setter Property="Background" Value="#FFFDE7"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}" Value="정지">
-                                                <Setter Property="Background" Value="#FFFDE7"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource LightThemePrimaryTextBrush}"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                        <TextBlock Text="상태: " Foreground="{StaticResource LightThemeSecondaryTextBrush}"/>
-                                        <TextBlock Text="{Binding Status}" FontWeight="SemiBold" Foreground="{StaticResource LightThemeAccentBrush}"/>
+                            <Border BorderBrush="{StaticResource LightThemeBorderBrush}" BorderThickness="0,0,0,1" Padding="15" Margin="0,2">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Row 0: Basic Info -->
+                                    <StackPanel Grid.Row="0">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource LightThemePrimaryTextBrush}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="상태: " Foreground="{StaticResource LightThemeSecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding Status}" FontWeight="SemiBold" Foreground="{StaticResource LightThemeAccentBrush}"/>
+                                        </StackPanel>
+                                        <ItemsControl ItemsSource="{Binding Details}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Margin="10,2,0,0">
+                                                        <TextBlock Foreground="{StaticResource LightThemeSecondaryTextBrush}">
+                                                            <Run Text="{Binding Key, Mode=OneWay}"/>
+                                                            <Run Text=": "/>
+                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding Value.Display}" Foreground="{StaticResource LightThemePrimaryTextBrush}"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-                                    <ItemsControl ItemsSource="{Binding Details}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" Margin="10,2,0,0">
-                                                    <TextBlock Foreground="{StaticResource LightThemeSecondaryTextBrush}">
-                                                        <Run Text="{Binding Key, Mode=OneWay}"/>
-                                                        <Run Text=": "/>
-                                                    </TextBlock>
-                                                    <TextBlock Text="{Binding Value.Display}" Foreground="{StaticResource LightThemePrimaryTextBrush}"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
+
+                                    <!-- Row 1: Health Status & Predictive Maintenance -->
+                                    <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Margin="0,15,0,5" Padding="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                                                <TextBlock Text="건강 상태" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,5"/>
+                                                <TextBlock Style="{StaticResource HealthStatusIndicatorStyle}" DataContext="{Binding Health}"/>
+                                            </StackPanel>
+
+                                            <Grid Grid.Column="1" Margin="10,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="실시간 진동 (g)" FontSize="12" Foreground="{StaticResource LightThemeSecondaryTextBrush}"/>
+                                                <oxy:PlotView Grid.Row="1" Model="{Binding Health.VibrationPlotModel}" Height="50"/>
+                                            </Grid>
+
+                                            <Grid Grid.Column="2" Margin="10,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="전류 소모량 (A)" FontSize="12" Foreground="{StaticResource LightThemeSecondaryTextBrush}"/>
+                                                <oxy:PlotView Grid.Row="1" Model="{Binding Health.CurrentPlotModel}" Height="50"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

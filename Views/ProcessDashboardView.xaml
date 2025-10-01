@@ -1,4 +1,3 @@
-
 <UserControl x:Class="ShipyardDashboard.Views.ProcessDashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -14,31 +13,8 @@
              Background="Transparent">
     <UserControl.Resources>
 
-        <!-- #region Converters -->
-        <services:ValueGreaterThanConverter x:Key="ValueGreaterThanConverter" />
-        <services:MetricFinderConverter x:Key="MetricFinderConverter" />
-        <services:SubListConverter x:Key="SubListConverter" />
-        <!-- #endregion -->
-
-        <!-- #region Base Metric & Text Styles -->
-        <Style x:Key="LabelTextStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource LightThemeSecondaryTextBrush}"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-        </Style>
-
-        <Style x:Key="ValueTextStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource LightThemePrimaryTextBrush}"/>
-            <Setter Property="FontSize" Value="22"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="TextAlignment" Value="Right"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
         <DataTemplate x:Key="EquipmentGroupCardTemplate">
-            <Border Style="{StaticResource CardBorderStyle}" Padding="15">
+            <Border x:Name="CardBorder" Style="{StaticResource CardBorderStyle}" Padding="15">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -79,6 +55,27 @@
                             CommandParameter="{Binding}" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 </Grid>
             </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard x:Name="FlashStoryboard">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="CardBorder" 
+                                              Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                              To="{StaticResource StatusError}" Duration="0:0:0.5" 
+                                              RepeatBehavior="Forever" AutoReverse="True"/>
+                                <ThicknessAnimation Storyboard.TargetName="CardBorder"
+                                                    Storyboard.TargetProperty="BorderThickness"
+                                                    To="3" Duration="0:0:0.5"
+                                                    RepeatBehavior="Forever" AutoReverse="True"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.EnterActions>
+                    <DataTrigger.ExitActions>
+                        <StopStoryboard BeginStoryboardName="FlashStoryboard"/>
+                    </DataTrigger.ExitActions>
+                </DataTrigger>
+            </DataTemplate.Triggers>
         </DataTemplate>
 
     </UserControl.Resources>

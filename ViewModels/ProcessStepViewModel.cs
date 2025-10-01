@@ -8,6 +8,9 @@ namespace ShipyardDashboard.ViewModels
         private string _name = "";
 
         [ObservableProperty]
+        private string _status = "";
+
+        [ObservableProperty]
         private string _icon = "";
 
         [ObservableProperty]

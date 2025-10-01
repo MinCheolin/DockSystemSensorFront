@@ -1,25 +1,42 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
 namespace ShipyardDashboard.Models
 {
-    public class DigitalTwinObject
+    public partial class DigitalTwinObject : ObservableObject
     {
         [JsonProperty("id")]
-        public string Id { get; set; } = string.Empty;
+        [ObservableProperty]
+        private string _id = string.Empty;
 
         [JsonProperty("name")]
-        public string Name { get; set; } = string.Empty;
+        [ObservableProperty]
+        private string _name = string.Empty;
 
         [JsonProperty("type")]
-        public string Type { get; set; } = string.Empty;
+        [ObservableProperty]
+        private string _type = string.Empty;
 
         [JsonProperty("x")]
-        public double X { get; set; }
+        [ObservableProperty]
+        private double _x;
 
         [JsonProperty("y")]
-        public double Y { get; set; }
+        [ObservableProperty]
+        private double _y;
 
         [JsonProperty("status")]
-        public string Status { get; set; } = string.Empty;
+        [ObservableProperty]
+        private string _status = string.Empty;
+
+        // Properties for animation, not from API
+        [JsonIgnore]
+        public double TargetX { get; set; }
+
+        [JsonIgnore]
+        public double TargetY { get; set; }
+
+        [JsonIgnore]
+        public double Speed { get; set; } = 1.0; // Default speed
     }
 }
