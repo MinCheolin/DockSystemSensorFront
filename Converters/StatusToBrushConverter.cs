@@ -18,6 +18,8 @@ namespace ShipyardDashboard.Converters
                 case "정상":
                 case "완료":
                     return (SolidColorBrush)new BrushConverter().ConvertFrom("#2ECC71"); // Green
+                case "진행중":
+                    return (SolidColorBrush)new BrushConverter().ConvertFrom("#3498DB"); // Blue
                 case "주의":
                 case "경고":
                 case "대기":

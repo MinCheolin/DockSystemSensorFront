@@ -157,7 +157,7 @@ namespace ShipyardDashboard.ViewModels
             if (_viewCache.TryGetValue(processName, out var view)) { return view; }
 
             UserControl newView = processName == "종합 현황"
-                ? new OverviewView { DataContext = new OverviewViewModel() }
+                ? new OverviewView { DataContext = new OverviewViewModel(_apiService) }
                 : new ProcessDashboardView { DataContext = new ProcessDashboardViewModel(processName, this) };
 
             _viewCache[processName] = newView;

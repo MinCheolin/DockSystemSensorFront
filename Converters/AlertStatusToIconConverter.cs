@@ -18,6 +18,8 @@ namespace ShipyardDashboard.Converters
                     return "\uE7BA"; // CriticalError
                 case "경고":
                     return "\uE783"; // Warning
+                case "점검 필요":
+                    return "\uE946"; // Settings (Wrench)
                 case "주의":
                     return "\uE76C"; // Info
                 case "정상":

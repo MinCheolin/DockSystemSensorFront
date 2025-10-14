@@ -60,7 +60,7 @@ namespace ShipyardDashboard.ViewModels
 
         private void UpdateStatusPlotModel()
         {
-            var plotModel = new PlotModel { PlotAreaBorderThickness = new OxyThickness(0), Background = OxyColors.Transparent };
+            var plotModel = new PlotModel { PlotAreaBorderThickness = new OxyThickness(0), Background = OxyColors.Transparent, Padding = new OxyThickness(20) };
             var series = new PieSeries
             {
                 StrokeThickness = 2,
@@ -70,15 +70,17 @@ namespace ShipyardDashboard.ViewModels
                 AngleSpan = 360,
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
-                TextColor = OxyColors.Black,
-                OutsideLabelFormat = "{1}", // {1} is the Label property of the PieSlice
+                TrackerFormatString = "{0}: {1:0}대 ({2:P0})", // {0} is the Label (status name), {1} is Value (count), {2} is Percentage
             };
 
             if (StatusSummary != null)
             {
                 foreach (var entry in StatusSummary.Where(s => s.Value > 0))
                 {
-                    series.Slices.Add(new PieSlice(entry.Key, entry.Value) { Fill = OxyColor.FromRgb(GetStatusColor(entry.Key).R, GetStatusColor(entry.Key).G, GetStatusColor(entry.Key).B) });
+                    series.Slices.Add(new PieSlice(entry.Key, entry.Value)
+                    {
+                        Fill = OxyColor.FromRgb(GetStatusColor(entry.Key).R, GetStatusColor(entry.Key).G, GetStatusColor(entry.Key).B)
+                    });
                 }
             }
 
@@ -88,12 +90,13 @@ namespace ShipyardDashboard.ViewModels
 
         private Color GetStatusColor(string status)
         {
+            // Backend statuses: "가동 중", "대기", "점검 중"
             return status switch
             {
-                "가동" or "작업 중" or "정상" or "분사 중" or "이동 중" => (Color)ColorConverter.ConvertFromString("#4CAF50"), // Green
+                "가동 중" or "용접 중" or "분사 중" or "이동 중" or "가동" or "작업 중" or "정상" => (Color)ColorConverter.ConvertFromString("#4CAF50"), // Green
                 "대기" => (Color)ColorConverter.ConvertFromString("#FFC107"), // Amber
+                "점검 중" or "오류" or "위험" => (Color)ColorConverter.ConvertFromString("#F44336"), // Red
                 "정지" => (Color)ColorConverter.ConvertFromString("#9E9E9E"), // Grey
-                "오류" or "위험" => (Color)ColorConverter.ConvertFromString("#F44336"), // Red
                 _ => Colors.Gray,
             };
         }

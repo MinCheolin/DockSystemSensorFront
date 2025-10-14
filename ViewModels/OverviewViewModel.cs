@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ShipyardDashboard.Models;
+using ShipyardDashboard.Services;
 using System.Collections.ObjectModel;
 using System.Text;
 using OxyPlot;
@@ -7,7 +8,10 @@ using OxyPlot.Series;
 using OxyPlot.Axes;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 using OxyPlot.Annotations;
+using System.Linq;
 
 namespace ShipyardDashboard.ViewModels
 {
@@ -29,29 +33,70 @@ namespace ShipyardDashboard.ViewModels
             .ToString();
     }
 
-    public partial class OverviewViewModel : ObservableObject
+    public partial class OverviewViewModel : ObservableObject, IDisposable
     {
+        private readonly ApiService _apiService;
+        private readonly DispatcherTimer _timer;
+
         [ObservableProperty]
         private ObservableCollection<ShipBlockViewModel> _shipBlocks = new();
         
-        // Restored properties for KPIs
-        [ObservableProperty] private OxyPlot.PlotModel _monthlyProductionPlot = new();
-        [ObservableProperty] private OxyPlot.PlotModel _operatingRateGauge = new();
-        [ObservableProperty] private OtherEquipmentViewModel _otherEquipment = new();
+        [ObservableProperty] 
+        private PlotModel _monthlyProductionPlot = new();
+        
+        [ObservableProperty] 
+        private PlotModel _operatingRateGauge = new();
+        
+        [ObservableProperty] 
+        private OtherEquipmentViewModel _otherEquipment = new();
 
         public OverviewViewModel()
         {
-            InitializeSampleData();
+            // This constructor is for the design-time preview in Visual Studio.
+             _apiService = new ApiService(); // Use a dummy service
+            if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
+            {
+                UpdateOperatingRateGauge(89.5);
+                UpdateMonthlyProductionPlot(new List<Overview.ChartDataPoint>());
+            }
         }
 
-        private void InitializeSampleData()
+        public OverviewViewModel(ApiService apiService)
         {
-            var random = new System.Random();
+            _apiService = apiService;
+            
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            _timer.Tick += async (s, e) => await LoadDataAsync();
+            _timer.Start();
+            
+            _ = LoadDataAsync();
+        }
 
-            // 1. Ship Blocks Data
+        private async Task LoadDataAsync()
+        {
+            var overviewData = await _apiService.GetOverviewAsync();
+            if (overviewData != null)
+            {
+                UpdateOperatingRateGauge(overviewData.EquipmentOperatingRate);
+                UpdateMonthlyProductionPlot(overviewData.MonthlyProduction);
+
+                // This part is just for visualization as the backend doesn't provide this specific data yet.
+                // In a real scenario, this would also come from the backend.
+                UpdateShipBlocks(); 
+                UpdateOtherEquipment(overviewData.OtherEquipmentStatus);
+            }
+        }
+
+        private void UpdateShipBlocks()
+        {
+            // Keep the random block generation for visual flair, as it's not the focus of the bug.
+            if (ShipBlocks.Any()) return; // Don't re-generate if already populated.
+
+            var random = new System.Random();
             var statuses = new[] { "완료", "진행중", "미시작", "오류" };
             int blockNumber = 1;
-            for (int i = 0; i < 50; i++)
+            var tempBlocks = new ObservableCollection<ShipBlockViewModel>();
+            for (int i = 0; i < 24; i++)
             {
                 var status = statuses[random.Next(statuses.Length)];
                 int progress = 0;
@@ -59,25 +104,29 @@ namespace ShipyardDashboard.ViewModels
                 else if (status == "진행중") progress = random.Next(20, 80);
                 else if (status == "오류") progress = random.Next(30, 90);
 
-                ShipBlocks.Add(new ShipBlockViewModel
+                tempBlocks.Add(new ShipBlockViewModel
                 {
                     BlockId = $"A-{blockNumber++}",
                     Status = status,
                     Progress = progress
                 });
             }
+            ShipBlocks = tempBlocks;
+        }
+        
+        private void UpdateOtherEquipment(List<Overview.SimpleEquipmentStatus> equipmentStatuses)
+        {
+            var mainCompressor = equipmentStatuses?.FirstOrDefault(e => e.Name.Contains("공기 압축기"));
+            var dustCollector = equipmentStatuses?.FirstOrDefault(e => e.Name.Contains("집진기"));
 
-            // 2. Other Equipment Data
-            OtherEquipment = new OtherEquipmentViewModel { MainCompressorStatus = "가동", CentralDustCollectorStatus = "경고" };
-
-            // 3. KPI Chart Data
-            var productionData = new List<Models.Overview.ChartDataPoint>();
-            for (int i = 0; i < 30; i++) { productionData.Add(new Models.Overview.ChartDataPoint { Date = DateTime.Now.AddDays(-29 + i).ToString("MM-dd"), Value = random.Next(80, 120) }); }
-            UpdateMonthlyProductionPlot(productionData);
-            UpdateOperatingRateGauge(89.5);
+            OtherEquipment = new OtherEquipmentViewModel
+            {
+                MainCompressorStatus = mainCompressor?.Status ?? "N/A",
+                CentralDustCollectorStatus = dustCollector?.Status ?? "N/A"
+            };
         }
 
-        private void UpdateMonthlyProductionPlot(List<Models.Overview.ChartDataPoint> productionData)
+        private void UpdateMonthlyProductionPlot(List<Overview.ChartDataPoint> productionData)
         {
             var plotModel = new PlotModel { PlotAreaBorderColor = OxyColors.Transparent, TextColor = OxyColor.FromRgb(100, 100, 100) };
             var lineSeries = new LineSeries { MarkerType = MarkerType.Circle, MarkerSize = 3, MarkerStroke = OxyColors.DodgerBlue, MarkerFill = OxyColors.White, MarkerStrokeThickness = 1.5, Color = OxyColors.DodgerBlue, StrokeThickness = 2 };
@@ -86,9 +135,13 @@ namespace ShipyardDashboard.ViewModels
 
             if (productionData != null)
             {
-                for (int i = 0; i < productionData.Count; i++) { lineSeries.Points.Add(new DataPoint(i, productionData[i].Value)); categoryAxis.Labels.Add(productionData[i].Date); }
+                for (int i = 0; i < productionData.Count; i++)
+                {
+                    lineSeries.Points.Add(new DataPoint(i, productionData[i].Value));
+                    categoryAxis.Labels.Add(productionData[i].Date);
+                }
             }
-            categoryAxis.LabelFormatter = (index) => { int idx = (int)index; if (idx >= 0 && idx < categoryAxis.Labels.Count && idx % 7 == 0) { return categoryAxis.Labels[idx]; } return null; };
+            categoryAxis.LabelFormatter = (index) => { int idx = (int)index; if (idx >= 0 && idx < categoryAxis.Labels.Count && idx % 3 == 0) { return categoryAxis.Labels[idx]; } return null; };
 
             plotModel.Series.Add(lineSeries);
             plotModel.Axes.Add(categoryAxis);
@@ -107,6 +160,11 @@ namespace ShipyardDashboard.ViewModels
             gaugeModel.Series.Add(series);
             gaugeModel.Annotations.Add(new TextAnnotation { Text = $"{value:N1}%", Font = "Segoe UI", FontSize = 24, FontWeight = FontWeights.Bold, TextColor = OxyColor.FromRgb(44, 62, 80), TextPosition = new DataPoint(0, 0), TextHorizontalAlignment = HorizontalAlignment.Center, TextVerticalAlignment = VerticalAlignment.Middle });
             OperatingRateGauge = gaugeModel;
+        }
+
+        public void Dispose()
+        {
+            _timer?.Stop();
         }
     }
 }

@@ -19,114 +19,101 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="디지털 트윈 관제 센터 - 선박 완성도" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,20"/>
+        <TextBlock Grid.Row="0" Text="실시간 선박 건조 현황" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,20"/>
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Main visualization area with overlays -->
             <Grid Grid.Row="0">
-                <!-- Layer 1 & 2: Blueprint and Blocks in a scaling Viewbox -->
-                <Viewbox Stretch="Uniform" Margin="0,0,0,10">
+                <!-- Layer 1: Blueprint and Blocks -->
+                <Viewbox Stretch="Uniform" Margin="0,0,0,0">
                     <Grid Width="1100" Height="500">
                         <!-- Blueprint Background -->
                         <Path Stroke="#A0B4C8" StrokeThickness="2" Opacity="0.6">
                             <Path.Data>
                                 <PathGeometry>
-                                    <PathFigure StartPoint="20,420">
-                                        <LineSegment Point="100,420"/>
-                                        <ArcSegment Size="150,150" Point="150,270" SweepDirection="Counterclockwise"/>
-                                        <LineSegment Point="950,270"/>
-                                        <LineSegment Point="1050,370"/>
-                                        <LineSegment Point="1050,420"/>
-                                        <LineSegment Point="20,420"/>
-                                    </PathFigure>
-                                    <PathFigure StartPoint="150,345">
-                                        <LineSegment Point="1025,345"/>
-                                    </PathFigure>
+                                    <PathFigure StartPoint="50,450"><LineSegment Point="1050,450"/><LineSegment Point="1100,400"/><LineSegment Point="100,400"/><BezierSegment Point1="80,400" Point2="60,410" Point3="50,450"/></PathFigure>
+                                    <PathFigure StartPoint="100,400"><LineSegment Point="1100,400"/></PathFigure>
+                                    <PathFigure StartPoint="150,350"><LineSegment Point="1080,350"/></PathFigure>
+                                    <PathFigure StartPoint="250,450"><LineSegment Point="250,350"/></PathFigure>
+                                    <PathFigure StartPoint="450,450"><LineSegment Point="450,350"/></PathFigure>
+                                    <PathFigure StartPoint="650,450"><LineSegment Point="650,350"/></PathFigure>
+                                    <PathFigure StartPoint="850,450"><LineSegment Point="850,350"/></PathFigure>
+                                    <PathFigure StartPoint="900,350"><LineSegment Point="900,280"/></PathFigure>
+                                    <PathFigure StartPoint="1050,350"><LineSegment Point="1050,280"/></PathFigure>
+                                    <PathFigure StartPoint="900,280"><LineSegment Point="1050,280"/></PathFigure>
                                 </PathGeometry>
                             </Path.Data>
                         </Path>
 
                         <!-- Block Overlay -->
-                        <ItemsControl ItemsSource="{Binding ShipBlocks}" Margin="150,270,100,80">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Rows="5" Columns="10"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
+                        <ItemsControl ItemsSource="{Binding ShipBlocks}" Margin="155,355,25,55">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="4" Columns="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="#FFFFFF" BorderThickness="0.5" ToolTip="{Binding TooltipText}" Margin="0.5">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Status}" Value="미시작">
-                                                        <Setter Property="Background" Value="#E0E0E0"/>
-                                                        <Setter Property="Opacity" Value="0.3"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="진행중">
-                                                        <Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="완료">
-                                                        <Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="오류">
-                                                        <Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{Binding BlockId}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="8" Foreground="#333333"/>
+                                    <Border BorderBrush="#FFFFFF" BorderThickness="1" ToolTip="{Binding TooltipText}" Margin="1">
+                                        <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="Transparent"/><Style.Triggers><DataTrigger Binding="{Binding Status}" Value="미시작"><Setter Property="Background" Value="#E0E0E0"/><Setter Property="Opacity" Value="0.3"/></DataTrigger><DataTrigger Binding="{Binding Status}" Value="진행중"><Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/></DataTrigger><DataTrigger Binding="{Binding Status}" Value="완료"><Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/></DataTrigger><DataTrigger Binding="{Binding Status}" Value="오류"><Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                                        <TextBlock Text="{Binding BlockId}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Foreground="#333333"/>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Grid>
                 </Viewbox>
+                
+                <!-- Layer 2: Overlapping UI Elements -->
+                <Grid>
+                    <!-- Legend -->
+                    <Border Style="{StaticResource CardBorderStyle}" Background="#D0FFFFFF" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="15,10,15,10">
+                            <TextBlock Text="범례:" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,15,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="10,0"><Rectangle Fill="#E0E0E0" Width="14" Height="14" VerticalAlignment="Center"/><TextBlock Text="미시작" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Center" Margin="5,0,0,0"/></StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10,0"><Rectangle Fill="#3498DB" Width="14" Height="14" VerticalAlignment="Center"/><TextBlock Text="진행중" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Center" Margin="5,0,0,0"/></StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10,0"><Rectangle Fill="#2ECC71" Width="14" Height="14" VerticalAlignment="Center"/><TextBlock Text="완료" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Center" Margin="5,0,0,0"/></StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10,0"><Rectangle Fill="#E74C3C" Width="14" Height="14" VerticalAlignment="Center"/><TextBlock Text="오류" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Center" Margin="5,0,0,0"/></StackPanel>
+                        </StackPanel>
+                    </Border>
 
-                <!-- Layer 3: KPI Widgets -->
-                <Border Style="{StaticResource CardBorderStyle}" Background="#D0FFFFFF" VerticalAlignment="Top" HorizontalAlignment="Left" Width="220" Margin="20">
-                    <StackPanel>
-                        <TextBlock Text="전체 장비 가동률" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                        <oxy:PlotView Model="{Binding OperatingRateGauge}" Height="150"/>
-                    </StackPanel>
-                </Border>
+                    <!-- KPI Widgets -->
+                    <Border Style="{StaticResource CardBorderStyle}" Background="#D0FFFFFF" VerticalAlignment="Top" HorizontalAlignment="Left" Width="220" Margin="20">
+                        <StackPanel>
+                            <TextBlock Text="전체 장비 가동률" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <oxy:PlotView Model="{Binding OperatingRateGauge}" Height="150"/>
+                        </StackPanel>
+                    </Border>
 
-                <Border Style="{StaticResource CardBorderStyle}" Background="#D0FFFFFF" VerticalAlignment="Top" HorizontalAlignment="Right" Width="250" Margin="20">
-                    <StackPanel>
-                        <TextBlock Text="주요 설비 상태" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                        <Grid Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="🟢" Foreground="{Binding OtherEquipment.MainCompressorStatus, Converter={StaticResource StatusToBrushConverter}}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="메인 공기 압축기" Style="{StaticResource BodyTextBlockStyle}" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding OtherEquipment.MainCompressorStatus}" Style="{StaticResource ValueTextBlockStyle}" Foreground="{Binding OtherEquipment.MainCompressorStatus, Converter={StaticResource StatusToBrushConverter}}"/>
-                            
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="🟡" Foreground="{Binding OtherEquipment.CentralDustCollectorStatus, Converter={StaticResource StatusToBrushConverter}}" VerticalAlignment="Center" Margin="0,5,0,0"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="중앙 집진기" Style="{StaticResource BodyTextBlockStyle}" Margin="5,5,0,0" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OtherEquipment.CentralDustCollectorStatus}" Style="{StaticResource ValueTextBlockStyle}" Foreground="{Binding OtherEquipment.CentralDustCollectorStatus, Converter={StaticResource StatusToBrushConverter}}" Margin="0,5,0,0"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                    <Border Style="{StaticResource CardBorderStyle}" Background="#D0FFFFFF" VerticalAlignment="Top" HorizontalAlignment="Right" Width="250" Margin="20">
+                        <StackPanel>
+                            <TextBlock Text="주요 설비 상태" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="🟢" Foreground="{Binding OtherEquipment.MainCompressorStatus, Converter={StaticResource StatusToBrushConverter}}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="메인 공기 압축기" Style="{StaticResource BodyTextBlockStyle}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding OtherEquipment.MainCompressorStatus}" Style="{StaticResource ValueTextBlockStyle}" Foreground="{Binding OtherEquipment.MainCompressorStatus, Converter={StaticResource StatusToBrushConverter}}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="🟡" Foreground="{Binding OtherEquipment.CentralDustCollectorStatus, Converter={StaticResource StatusToBrushConverter}}" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="중앙 집진기" Style="{StaticResource BodyTextBlockStyle}" Margin="5,5,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OtherEquipment.CentralDustCollectorStatus}" Style="{StaticResource ValueTextBlockStyle}" Foreground="{Binding OtherEquipment.CentralDustCollectorStatus, Converter={StaticResource StatusToBrushConverter}}" Margin="0,5,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Grid>
 
             <!-- Bottom KPI Card -->
-            <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Background="#E0FFFFFF" HorizontalAlignment="Stretch" MinHeight="220" Margin="20,10,20,20">
-                <StackPanel>
-                    <TextBlock Text="월별 생산량" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                    <oxy:PlotView Model="{Binding MonthlyProductionPlot}" Height="170"/>
-                </StackPanel>
+            <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Background="#E0FFFFFF" HorizontalAlignment="Stretch" Margin="20,10,20,20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="월별 생산량" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <oxy:PlotView Grid.Row="1" Model="{Binding MonthlyProductionPlot}"/>
+                </Grid>
             </Border>
         </Grid>
     </Grid>
