@@ -39,6 +39,7 @@ namespace ShipyardDashboard.ViewModels
         [ObservableProperty] private UserControl _currentView;
         [ObservableProperty] private GlobalAlerts _globalAlerts;
         [ObservableProperty] private bool _isKioskModeActive = false;
+        [ObservableProperty] private IEnumerable<AlertGroup>? _groupedAlerts;
 
         // New properties for improved kiosk mode
         [ObservableProperty] private int _kioskCountdown;
@@ -169,11 +170,15 @@ namespace ShipyardDashboard.ViewModels
             var alerts = await _apiService.GetGlobalAlertsAsync();
             if (alerts != null)
             {
-                if (alerts.Alerts != null)
-                {
-                    alerts.Alerts = alerts.Alerts.Where(a => a.Status != "정상").ToList();
-                }
                 GlobalAlerts = alerts;
+
+                var categoryOrder = new List<string> { "안전", "설비", "환경" };
+        
+                GroupedAlerts = alerts.Alerts?
+                    .GroupBy(a => a.Category)
+                    .OrderBy(g => categoryOrder.IndexOf(g.Key))
+                    .Select(g => new AlertGroup { Category = g.Key, Alerts = g.ToList(), AlertCount = g.Count() })
+                    .ToList();
             }
         }
         

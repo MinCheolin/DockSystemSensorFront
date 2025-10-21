@@ -5,6 +5,9 @@ namespace ShipyardDashboard.Models
 {
     public class AlertItem
     {
+        [JsonProperty("category")]
+        public string Category { get; set; } = string.Empty;
+
         [JsonProperty("alertType")]
         public string AlertType { get; set; } = string.Empty;
 

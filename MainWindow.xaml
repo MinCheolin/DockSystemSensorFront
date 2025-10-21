@@ -77,14 +77,45 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </StackPanel>
-                <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding GlobalAlerts.AlertSummary}" HorizontalAlignment="Center" Margin="0,0,0,15">
-                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Margin="10,0"><TextBlock Text="{Binding Key, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets" FontSize="16" VerticalAlignment="Center" Foreground="{Binding Key, Converter={StaticResource AlertStatusToBrushConverter}}"/><TextBlock Text="{Binding Key, Mode=OneWay}" Foreground="{Binding Key, Converter={StaticResource AlertStatusToBrushConverter}}" FontSize="14" FontWeight="SemiBold" Margin="5,0,2,0" VerticalAlignment="Center"/><TextBlock Text="{Binding Value, Mode=OneWay}" Foreground="White" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource DarkThemeBorderBrush}" Margin="0,0,0,15"/>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding GlobalAlerts.Alerts}">
-                        <ItemsControl.ItemTemplate><DataTemplate><Border Background="{StaticResource DarkThemeCardBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8"><StackPanel><TextBlock FontSize="14" FontWeight="Bold" Foreground="{Binding Status, Converter={StaticResource AlertStatusToBrushConverter}, Mode=OneWay}"><Run Text="{Binding Status, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets"/><Run Text="{Binding AlertType, Mode=OneWay}"/></TextBlock><TextBlock Text="{Binding Location, Mode=OneWay}" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" FontSize="12" Margin="0,2,0,4"/><TextBlock Text="{Binding Message, Mode=OneWay}" Foreground="White" TextWrapping="Wrap"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate>
+                <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding GroupedAlerts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Template for each Category Group -->
+                                <StackPanel Margin="0,10,0,10">
+                                    <!-- Group Header -->
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Category}" Foreground="{StaticResource DarkThemeTextBrush}" FontSize="16" FontWeight="Bold"/>
+                                        <TextBlock Text=" 알림" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" FontSize="16"/>
+                                        <TextBlock Foreground="{StaticResource DarkThemeSecondaryTextBrush}" FontSize="14" Margin="8,0,0,0" VerticalAlignment="Bottom">
+                                            <Run Text="("/>
+                                            <Run Text="{Binding AlertCount}"/>
+                                            <Run Text="건)"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Border Height="1" Background="{StaticResource DarkThemeBorderBrush}" Margin="0,5,0,8"/>
+
+                                    <!-- Nested ItemsControl for Alerts in this Group -->
+                                    <ItemsControl ItemsSource="{Binding Alerts}">
+                                        <ItemsControl.ItemTemplate>
+                                            <!-- This is the existing template for a single alert item -->
+                                            <DataTemplate>
+                                                <Border Background="{StaticResource DarkThemeCardBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                                                    <StackPanel>
+                                                        <TextBlock FontSize="14" FontWeight="Bold" Foreground="{Binding Status, Converter={StaticResource AlertStatusToBrushConverter}, Mode=OneWay}">
+                                                            <Run Text="{Binding Status, Converter={StaticResource AlertStatusToIconConverter}, Mode=OneWay}" FontFamily="Segoe MDL2 Assets"/>
+                                                            <Run Text="{Binding AlertType, Mode=OneWay}"/>
+                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding Location, Mode=OneWay}" Foreground="{StaticResource DarkThemeSecondaryTextBrush}" FontSize="12" Margin="0,2,0,4"/>
+                                                        <TextBlock Text="{Binding Message, Mode=OneWay}" Foreground="White" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
             </DockPanel>

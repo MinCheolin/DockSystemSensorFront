@@ -46,6 +46,9 @@ namespace ShipyardDashboard.ViewModels
         
         [ObservableProperty] 
         private PlotModel _operatingRateGauge = new();
+
+        [ObservableProperty]
+        private PlotModel _alertSummaryGauge = new();
         
         [ObservableProperty] 
         private OtherEquipmentViewModel _otherEquipment = new();
@@ -58,6 +61,7 @@ namespace ShipyardDashboard.ViewModels
             {
                 UpdateOperatingRateGauge(89.5);
                 UpdateMonthlyProductionPlot(new List<Overview.ChartDataPoint>());
+                CreateAlertSummaryGauge(); // For design-time
             }
         }
 
@@ -70,6 +74,7 @@ namespace ShipyardDashboard.ViewModels
             _timer.Start();
             
             _ = LoadDataAsync();
+            CreateAlertSummaryGauge(); // For runtime
         }
 
         private async Task LoadDataAsync()
@@ -160,6 +165,20 @@ namespace ShipyardDashboard.ViewModels
             gaugeModel.Series.Add(series);
             gaugeModel.Annotations.Add(new TextAnnotation { Text = $"{value:N1}%", Font = "Segoe UI", FontSize = 24, FontWeight = FontWeights.Bold, TextColor = OxyColor.FromRgb(44, 62, 80), TextPosition = new DataPoint(0, 0), TextHorizontalAlignment = HorizontalAlignment.Center, TextVerticalAlignment = VerticalAlignment.Middle });
             OperatingRateGauge = gaugeModel;
+        }
+
+        private void CreateAlertSummaryGauge()
+        {
+            var gaugeModel = new PlotModel { PlotAreaBorderThickness = new OxyThickness(0), Background = OxyColors.Transparent };
+            var series = new PieSeries { StartAngle = 180, AngleSpan = 180, InnerDiameter = 0.6, StrokeThickness = 0 };
+
+            // Hardcoded values for the 24-hour alert summary
+            series.Slices.Add(new PieSlice("안전", 83) { Fill = OxyColor.FromRgb(46, 204, 113) }); // Green
+            series.Slices.Add(new PieSlice("경고", 12) { Fill = OxyColor.FromRgb(241, 196, 15) }); // Orange
+            series.Slices.Add(new PieSlice("위험", 5) { Fill = OxyColor.FromRgb(231, 76, 60) });   // Red
+
+            gaugeModel.Series.Add(series);
+            AlertSummaryGauge = gaugeModel;
         }
 
         public void Dispose()
